@@ -12,6 +12,8 @@ from sqlalchemy import create_engine
 load_dotenv()
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")
 CSV_PATH = os.getenv("CSV_PATH")
+CSV_PATH_DUP = os.getenv("CSV_PATH_DUP")
+
 
 REQUIRED_COLS: Final[list[str]] = [
     "AsofDate", "client", "strategy", "ticker",
@@ -106,22 +108,24 @@ def cli():
     """Multi‑script driver.  Run `python app.py --help` to list jobs."""
     pass
 
-def get_io_source() -> IO:
+def get_io_source(custom_path: str | None = None) -> IO:
     if ENVIRONMENT == "prod":
         return DatabaseReader()
     elif ENVIRONMENT == "dev":
-        if not CSV_PATH:
-            click.echo("CSV_PATH not set in .env", err=True)
+        path = custom_path
+        if not path:
+            click.echo("CSV path not set in .env", err=True)
             sys.exit(1)
-        return CSVReader(Path(CSV_PATH))
+        return CSVReader(Path(path))
     else:
         click.echo(f"Unknown ENVIRONMENT: {ENVIRONMENT}", err=True)
         sys.exit(1)
 
+
 @cli.command("neg_checker")
 def negative_position_checker():
     try:
-        reader = get_io_source()
+        reader = get_io_source(custom_path=CSV_PATH)
         df = (
             reader.load_data()
                   .pipe(select_required)
@@ -132,23 +136,29 @@ def negative_position_checker():
     except Exception as exc:
         click.echo(f"ERROR: {exc}", err=True)
         sys.exit(1)
+    click.echo(df.empty)
 
-    if not df.empty:
-        #click.echo(df.to_string(index=False))
-        click.echo(json.dumps(LOG, indent=2))
 
-@cli.command("just_group")
-def just_group():
-    reader = get_io_source()
-    df = (
-        reader.load_data()
-              .pipe(select_required)
-              .pipe(group_and_sum)
-              .pipe(exclude_strategies)
-              .pipe(keep_negatives)
-    )
-    click.echo(df.to_string(index=False))
+def dup_checker(df: pd.DataFrame) -> bool:
+    dup_cols = [
+        "AsofDate", "Client", "Strategy", "Symbol",
+        "SecType", "Contract", "Short", "Long", "account"
+    ]
+    duplicates = df[df.duplicated(subset=dup_cols, keep=False)]
+    return duplicates
+
+@cli.command("dup_req")
+def dup_req():
+    try:
+        reader = get_io_source(custom_path=CSV_PATH_DUP)
+        has_duplicates = (
+            reader.load_data()
+                  .pipe(dup_checker)  
+        )
+    except Exception as exc:
+        click.echo(f"ERROR: {exc}", err=True)
+        sys.exit(1)
+    click.echo(has_duplicates)
 
 if __name__ == "__main__":
     cli()
-
