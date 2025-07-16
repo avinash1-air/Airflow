@@ -1,15 +1,12 @@
 import os
-import sys
 from click.testing import CliRunner
+from dotenv import load_dotenv
 
+load_dotenv(dotenv_path=".env_test", override=True)
+
+from app import cli
 def test_short_strats_without_positive_positions():
-    os.environ["ENVIRONMENT"] = "dev"
     os.environ["CSV_PATH"] = "jam_positions.csv"  
-
-    if "app" in sys.modules:
-        del sys.modules["app"]
-    from app import cli
-
     runner = CliRunner()
     result = runner.invoke(cli, ["short_strats"])
     assert result.output == "True\n"

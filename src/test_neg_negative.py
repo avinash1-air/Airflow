@@ -1,16 +1,13 @@
 import os
-import sys
 from click.testing import CliRunner
-
-os.environ["ENVIRONMENT"] = "dev"
-os.environ["CSV_PATH"] = "test_data/jam_positions.csv" 
-
-if "app" in sys.modules:
-        del sys.modules["app"]
+from dotenv import load_dotenv
+    
+load_dotenv(dotenv_path=".env_test", override=True)
 
 from app import cli
 def test_neg_checker_with_negative_data():
+    os.environ["CSV_PATH"] = "jam_positions.csv" 
     runner = CliRunner()
     result = runner.invoke(cli, ["neg_checker"])
-    #print("-------->", result.output) 
+    print("-------->", result.output) 
     assert result.output == "False\n"

@@ -1,8 +1,6 @@
 from __future__ import annotations
-from sqlalchemy import create_engine, text
+from iointerface import get_io_source
 import json, sys
-from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import Final
 import click
 import pandas as pd
@@ -11,14 +9,8 @@ import os
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-load_dotenv(dotenv_path=".env", override=True)
-ENVIRONMENT = os.getenv("ENVIRONMENT", "test")
-env_file = f".env_{ENVIRONMENT}"
-load_dotenv(dotenv_path=env_file, override=True)
-
-CSV_PATH = os.getenv("CSV_PATH")
-CSV_PATH_DUP = os.getenv("CSV_PATH_DUP")
-CSV_PATH_CON= os.getenv("CSV_PATH_CON")
+env = os.getenv("ENVIRONMENT") 
+load_dotenv(dotenv_path=f".env_{env}", override=True) 
 
 REQUIRED_COLS: Final[list[str]] = [
     "AsofDate", "client", "strategy", "ticker",
@@ -47,69 +39,6 @@ LOG: Final[dict[str, object]] = {
     "records_error":  0,
 }
 
-# ─────────────────────── IO Classes ───────────────────────────── #
-class IO(ABC):
-    @abstractmethod
-    def load_data(self) -> pd.DataFrame:
-        pass
-
-class CSVReader(IO):
-    def __init__(self, path: Path, sep: str = ","):
-        self.path = path
-        self.sep = sep
-
-    def load_data(self) -> pd.DataFrame:
-        return pd.read_csv(self.path,sep=self.sep)
-
-#Database
-SQL_FILE_MAP: Final[dict[str, str]] = {
-    "NEG_CHECKER_TABLE": "sql/neg_checker.sql",
-    "DUP_REQ_TABLE": "sql/dup_req.sql",
-    "SHORT_STRATS_TABLE": "sql/short_strats.sql",
-    "CONTRACT_REQ_TABLE": "sql/contract_req.sql",
-}
-
-CSV_FILE_MAP: Final[dict[str, str]] = {
-    "NEG_CHECKER_TABLE": CSV_PATH,
-    "DUP_REQ_TABLE": CSV_PATH_DUP,
-    "CONTRACT_REQ_TABLE": CSV_PATH_CON,
-    "SHORT_STRATS_TABLE": CSV_PATH,
-}
-
-def get_database(file_path: str, params=None, args: tuple = ()) -> pd.DataFrame:
-    with open(file_path, 'r') as f:
-        query = f.read().format(*args)
-    conn_str = (
-        f"mssql+pyodbc://{os.getenv('DB_SERVER')}/{os.getenv('DB_NAME')}"
-        f"?driver={os.getenv('DB_DRIVER').replace('{', '').replace('}', '')}"
-        f"&trusted_connection={os.getenv('DB_TRUSTED_CONN', 'yes')}"
-    )
-    engine = create_engine(conn_str)
-    with engine.connect() as conn:
-        df = pd.read_sql(text(query), conn, params=params)
-    return df
-
-def get_io_source(source_key: str, sep: str = ",") -> IO:
-    print('source_key', source_key)
-    print(f"🔁 get_io_source ENV = {ENVIRONMENT}")
-    if ENVIRONMENT == "prod":
-        sql_path = SQL_FILE_MAP.get(source_key)        
-        class SQLReader(IO):
-            def load_data(self) -> pd.DataFrame:
-                return get_database(sql_path)     
-        return SQLReader()
-
-    elif ENVIRONMENT == "test":
-        csv_path = CSV_FILE_MAP.get(source_key)
-        if not csv_path:
-            click.echo(f"CSV path for {source_key} not set", err=True)
-            sys.exit(1)    
-        return CSVReader(Path(csv_path), sep=sep)
-    else:
-        click.echo(f"Unknown ENVIRONMENT: {ENVIRONMENT}", err=True)
-        sys.exit(1)
-
-# ─────────────────────── Logic functions ───────────────────────── #
 def select_required(df: pd.DataFrame) -> pd.DataFrame:
     return df[REQUIRED_COLS]
 
@@ -133,7 +62,6 @@ def cli():
     """Multi‑script driver.  Run `python app.py --help` to list jobs."""
     pass
 
-
 @cli.command("neg_checker")
 def negative_position_checker():
     try:
@@ -150,7 +78,6 @@ def negative_position_checker():
         sys.exit(1)
     click.echo(df.empty)
 
-
 def dup_checker(df: pd.DataFrame) -> bool:
     dup_cols = [
         "AsofDate", "Client", "Strategy", "Symbol",
@@ -161,7 +88,7 @@ def dup_checker(df: pd.DataFrame) -> bool:
 @cli.command("dup_req")
 def dup_req():
     try:
-        reader = get_io_source("DUP_REQ_TABLE ")
+        reader = get_io_source("DUP_REQ_TABLE")
         has_duplicates = (
             reader.load_data()
                   .pipe(dup_checker)  
@@ -171,10 +98,9 @@ def dup_req():
         sys.exit(1)
     click.echo(has_duplicates.empty)
 
-
 def filter_today(df: pd.DataFrame) -> pd.DataFrame:
     today = pd.Timestamp.today().strftime("%Y%m%d")
-    return df[df["AsofDate"] == today]
+    return df[df["AsofDate"].astype(str) == today]
 
 def filter_trade_type(df: pd.DataFrame) -> pd.DataFrame:
     return df[df["tradeType"].isin(["Futures", "LME"])]
@@ -207,6 +133,7 @@ def short_strategies_checker():
         click.echo(f"ERROR: {exc}", err=True)
         sys.exit(1)
     
+
 MONTH_CODE_MAP = {
     'F': 1, 'G': 2, 'H': 3, 'J': 4, 'K': 5, 'M': 6,
     'N': 7, 'Q': 8, 'U': 9, 'V': 10, 'X': 11, 'Z': 12
@@ -237,7 +164,6 @@ def cContractDurationReq():
     except Exception as exc:
         click.echo(f"ERROR: {exc}", err=True)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     cli()
