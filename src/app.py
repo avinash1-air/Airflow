@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-env = os.getenv("ENVIRONMENT") 
+env = os.getenv("ENVIRONMENT","prod") 
 load_dotenv(dotenv_path=f".env_{env}", override=True) 
 
 REQUIRED_COLS: Final[list[str]] = [
@@ -164,6 +164,7 @@ def cContractDurationReq():
     except Exception as exc:
         click.echo(f"ERROR: {exc}", err=True)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     cli()
