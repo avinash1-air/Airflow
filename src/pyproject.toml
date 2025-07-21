@@ -14,9 +14,6 @@ dependencies = [
     "python-dateutil (>=2.9.0.post0,<3.0.0)",
     "pyodbc (>=5.2.0,<6.0.0)"
 ]
-[tool.poetry.dev-dependencies]
-pytest = "^7.4"
-
 [tool.poetry]
 packages = [
     { include = "app.py" },

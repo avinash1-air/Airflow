@@ -46,3 +46,4 @@ jobs:
           body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
           to: y.avinash@csm.tech
           from: ${{ secrets.EMAIL_USERNAME }}
+          
