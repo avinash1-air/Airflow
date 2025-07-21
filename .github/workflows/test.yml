@@ -38,12 +38,10 @@ jobs:
         if: failure()
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: smtp.office365.com
-          server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
+          server_address: 10.1.1.117
+          server_port: 25
+          secure: false
           subject: "🚨 Test Failed in Airflow Repo"
           body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
           to: y.avinash@csm.tech
-          from: ${{ secrets.EMAIL_USERNAME }}
-          
+          from: y.avinash@csm.tech
