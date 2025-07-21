@@ -1,0 +1,48 @@
+name: Run Tests and Send Email on Failure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          cd src
+          poetry install
+
+      - name: Run tests
+        id: run_tests
+        run: |
+          cd src
+          poetry run pytest || echo "failed" > ../status.txt
+
+      - name: Send email if tests fail
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.office365.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚨 Test Failed in Airflow Repo"
+          body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
+          to: y.avinash@csm.tech
+          from: ${{ secrets.EMAIL_USERNAME }}
