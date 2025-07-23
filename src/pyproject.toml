@@ -26,6 +26,9 @@ dup_req = "app:dup_req"
 short_strats = "app:short_strategies_checker"
 contract_req = "app:cContractDurationReq"
 
+[tool.pytest.ini_options]
+pythonpath = [ "." ]
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
