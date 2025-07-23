@@ -32,7 +32,7 @@ jobs:
         id: run_tests
         run: |
           cd src
-          poetry run pytest 
+          poetry run pytest -v
 
       - name: Send email if tests fail
         if: failure()
@@ -44,5 +44,5 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "🚨 Test Failed in Airflow Repo"
           body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
-          to: y.avinash@csm.tech
+          to: dmajumder@corecommodityllc.com
           from: ${{ secrets.EMAIL_USERNAME }}
