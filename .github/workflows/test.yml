@@ -46,15 +46,18 @@
 #           body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
 #           to: dmajumder@corecommodityllc.com
 #           from: ${{ secrets.EMAIL_USERNAME }}
-name: Run Tests and Auto-Merge to Main on Success
+
+
+
+name: Run Tests and Auto-Push to Main if Passed
 
 on:
   push:
     branches-ignore:
-      - main  # Ignore direct pushes to main to force controlled merge
+      - main  # Prevent direct push to main triggering this workflow
 
 jobs:
-  test:
+  test-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -91,23 +94,16 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "🚨 Test Failed in Airflow Repo"
-          body: "Some tests failed in the latest push. Please check the Actions tab on GitHub."
+          body: "Tests failed. The code was NOT pushed to main. Please fix and retry."
           to: dmajumder@corecommodityllc.com
           from: ${{ secrets.EMAIL_USERNAME }}
 
-  merge_to_main:
-    needs: test
-    if: ${{ needs.test.result == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Merge to main
+      - name: Push to main if tests pass
+        if: success()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout main
           git merge ${{ github.ref_name }} --no-ff -m "Auto-merge after successful tests"
-          git push origin main
+          git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}.git main
