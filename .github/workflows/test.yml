@@ -51,7 +51,7 @@ name: Run Tests and Auto-Merge to Main on Success
 on:
   push:
     branches-ignore:
-      - main  # Prevent direct pushes to main from triggering
+      - main  # Ignore direct pushes to main to force controlled merge
 
 jobs:
   test:
@@ -95,19 +95,19 @@ jobs:
           to: dmajumder@corecommodityllc.com
           from: ${{ secrets.EMAIL_USERNAME }}
 
-  merge:
+  merge_to_main:
     needs: test
     if: ${{ needs.test.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Auto-merge to main if tests pass
-        uses: devops-infra/action-pull-request@v0.5.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          source_branch: ${{ github.ref_name }}
-          target_branch: main
-          title: "Auto-merge: ${{ github.ref_name }}"
-          body: "Tests passed. Auto-merging to main."
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-
-#new
+      - name: Merge to main
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          git merge ${{ github.ref_name }} --no-ff -m "Auto-merge after successful tests"
+          git push origin main
