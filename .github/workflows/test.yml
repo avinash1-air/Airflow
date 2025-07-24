@@ -1,63 +1,12 @@
-# name: Run Tests and Send Email on Failure
-
-# on:
-#   push:
-#     branches:
-#       - main
-
-# jobs:
-#   test:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: '3.11'
-
-#       - name: Install Poetry
-#         run: |
-#           curl -sSL https://install.python-poetry.org | python3 -
-#           echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-#       - name: Install dependencies
-#         run: |
-#           cd src
-#           poetry install
-
-#       - name: Run tests
-#         id: run_tests
-#         run: |
-#           cd src
-#           poetry run pytest -v
-
-#       - name: Send email if tests fail
-#         if: failure()
-#         uses: dawidd6/action-send-mail@v3
-#         with:
-#           server_address: smtp.office365.com
-#           server_port: 587
-#           username: ${{ secrets.EMAIL_USERNAME }}
-#           password: ${{ secrets.EMAIL_PASSWORD }}
-#           subject: "🚨 Test Failed in Airflow Repo"
-#           body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
-#           to: dmajumder@corecommodityllc.com
-#           from: ${{ secrets.EMAIL_USERNAME }}
-
-
-
-name: Run Tests and Auto-Push to Main if Passed
+name: Run Tests and Send Email on Failure
 
 on:
   push:
-    branches-ignore:
-      - main  # Prevent direct push to main triggering this workflow
+    branches:
+      - main
 
 jobs:
-  test-and-push:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -94,16 +43,8 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "🚨 Test Failed in Airflow Repo"
-          body: "Tests failed. The code was NOT pushed to main. Please fix and retry."
+          body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
           to: dmajumder@corecommodityllc.com
           from: ${{ secrets.EMAIL_USERNAME }}
 
-      - name: Push to main if tests pass
-        if: success()
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout main
-          git merge ${{ github.ref_name }} --no-ff -m "Auto-merge after successful tests"
-          git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}.git main
+#old
