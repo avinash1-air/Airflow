@@ -1,6 +1,6 @@
 from __future__ import annotations
 from iointerface import get_io_source
-import json, sys
+import sys
 from typing import Final
 import click
 import pandas as pd
