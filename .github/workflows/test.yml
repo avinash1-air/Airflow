@@ -1,7 +1,11 @@
 name: Run Tests and Send Email on Failure
 
+# on:
+#   push:
+#     branches:
+#       - main
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -34,17 +38,15 @@ jobs:
           cd src
           poetry run pytest -v
 
-      - name: Send email if tests fail
-        if: failure()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.office365.com
-          server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "🚨 Test Failed in Airflow Repo"
-          body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
-          to: dmajumder@corecommodityllc.com
-          from: ${{ secrets.EMAIL_USERNAME }}
-
-#old
+      # - name: Send email if tests fail
+      #   if: failure()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.office365.com
+      #     server_port: 587
+      #     username: ${{ secrets.EMAIL_USERNAME }}
+      #     password: ${{ secrets.EMAIL_PASSWORD }}
+      #     subject: "🚨 Test Failed in Airflow Repo"
+      #     body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
+      #     to: dmajumder@corecommodityllc.com
+      #     from: ${{ secrets.EMAIL_USERNAME }}
