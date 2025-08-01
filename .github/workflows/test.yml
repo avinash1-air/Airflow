@@ -63,18 +63,13 @@
 
 
 name: Run Tests and Auto-Merge to Main
-
-# on:
-#   push:
-#     branches:
-#       - main
 on:
   pull_request:
     branches:
-      - testig  # Trigger on push to testig branch
+      - testig  
   pull_request:
     branches:
-      - main    # Trigger when PR is raised against main
+      - main    
 
 jobs:
   test:
