@@ -64,8 +64,12 @@
 
 name: Run Tests and Auto-Merge to Main
 
+# on:
+#   push:
+#     branches:
+#       - main
 on:
-  push:
+  pull_request:
     branches:
       - testig  # Trigger on push to testig branch
   pull_request:
