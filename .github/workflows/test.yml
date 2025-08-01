@@ -95,6 +95,7 @@ jobs:
         run: |
           cd src
           poetry run pytest -v
+
       - name: Send email if tests fail
         if: failure()
         uses: dawidd6/action-send-mail@v3
@@ -116,8 +117,8 @@ jobs:
       #     password: ${{ secrets.EMAIL_PASSWORD }}
       #     subject: "🚨 Test Failed in Airflow Repo"
       #     body: "Tests failed in testig branch. Please check the Actions tab."
-      #     to: y.avinash@csm.tech
-      #     from: ${{ secrets.EMAIL_USERNAME }}
+      #     to: dmajumder@corecommodityllc.com
+      #     from:y.avinash@csm.tech
 
   merge:
     runs-on: ubuntu-latest
