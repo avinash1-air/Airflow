@@ -38,20 +38,20 @@ jobs:
           cd src
           poetry run pytest -v
 
-#       - name: Send email if tests fail
-#         if: failure()
-#         uses: dawidd6/action-send-mail@v3
-#         with:
-#           server_address: smtp.office365.com
-#           server_port: 587
-#           username: ${{ secrets.EMAIL_USERNAME }}
-#           password: ${{ secrets.EMAIL_PASSWORD }}
-#           subject: "🚨 Test Failed in Airflow Repo"
-#           body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
-#           to: dmajumder@corecommodityllc.com
-#           from: ${{ secrets.EMAIL_USERNAME }}
+      - name: Send email if tests fail
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.office365.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚨 Test Failed in Airflow Repo"
+          body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
+          to: dmajumder@corecommodityllc.com
+          from: ${{ secrets.EMAIL_USERNAME }}
         
-# release:
+# merge:
 #     runs-on: ubuntu-latest
 #     needs: test # This job will only run if build-and-test succeeds
 #     steps:
@@ -59,7 +59,11 @@ jobs:
 #       - name: Perform release
 #         run: |
 #           echo "Performing release..."
-
-
-
-#just for testing
+release:
+    runs-on: ubuntu-latest
+    needs: test # This job will only run if build-and-test succeeds
+    steps:
+      - uses: actions/checkout@v4
+      - name: Perform release
+        run: |
+          echo "Performing release..."
