@@ -64,9 +64,6 @@
 
 name: Run Tests and Auto-Merge to Main
 on:
-  push:
-    branches:
-      - testig   # Trigger on push to testig
   pull_request:
     branches:
       - main     # Trigger when PR is created to main
