@@ -46,7 +46,7 @@
 #           server_port: 587
 #           username: ${{ secrets.EMAIL_USERNAME }}
 #           password: ${{ secrets.EMAIL_PASSWORD }}
-#           subject: "🚨 Test Failed in Airflow Repo"
+#           subject: "Test Failed in Airflow Repo"
 #           body: "Some tests failed in the latest push to main. Please check the Actions tab on GitHub."
 #           to: dmajumder@corecommodityllc.com
 #           from: ${{ secrets.EMAIL_USERNAME }}
@@ -102,7 +102,7 @@ jobs:
       #   with:
       #     server_address: 10.1.1.117
       #     server_port: 25
-      #     subject: "🚨 Test Failed in Airflow Repo"
+      #     subject: "Test Failed in Airflow Repo"
       #     body: "Tests failed in the testig branch. Please check the Actions tab."
       #     to: y.avinash@csm.tech
       #     from: y.avinash@csm.tech
@@ -115,7 +115,7 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "🚨 Test Failed in Airflow Repo"
+          subject: "Test Failed in Airflow Repo"
           body: "Tests failed in testig branch. Please check the Actions tab."
           to: dmajumder@corecommodityllc.com
           from: y.avinash@csm.tech
@@ -137,7 +137,7 @@ jobs:
         run: |
           git fetch origin
           git checkout main
-          git merge origin/testig --no-ff -m "Auto-merged testig into main"
+          git merge testig 
           git push origin main
 
-#-------------------------------------------CLOSE PR---------------------------------------------------
+#-------------------------------------------CLOSE---------------------------------------------------
