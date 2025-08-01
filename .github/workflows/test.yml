@@ -118,7 +118,7 @@ jobs:
           subject: "🚨 Test Failed in Airflow Repo"
           body: "Tests failed in testig branch. Please check the Actions tab."
           to: dmajumder@corecommodityllc.com
-          from:y.avinash@csm.tech
+          from: y.avinash@csm.tech
 
   merge:
     runs-on: ubuntu-latest
