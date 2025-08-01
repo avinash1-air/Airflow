@@ -96,6 +96,17 @@ jobs:
           cd src
           poetry run pytest -v
 
+      # - name: Send email if tests fail
+      #   if: failure()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: 10.1.1.117
+      #     server_port: 25
+      #     subject: "🚨 Test Failed in Airflow Repo"
+      #     body: "Tests failed in the testig branch. Please check the Actions tab."
+      #     to: y.avinash@csm.tech
+      #     from: y.avinash@csm.tech
+
       - name: Send email if tests fail
         if: failure()
         uses: dawidd6/action-send-mail@v3
@@ -107,7 +118,7 @@ jobs:
           subject: "🚨 Test Failed in Airflow Repo"
           body: "Tests failed in testig branch. Please check the Actions tab."
           to: dmajumder@corecommodityllc.com
-          from: ${{ secrets.EMAIL_USERNAME }}
+          from: y.avinash@csm.tech
 
   merge:
     runs-on: ubuntu-latest
@@ -126,6 +137,7 @@ jobs:
         run: |
           git fetch origin
           git checkout main
-          git merge origin/testig --no-ff -m "Auto-merged testig into main after successful tests"
+          git merge origin/testig --no-ff -m "Auto-merged testig into main"
           git push origin main
 
+#-------------------------------------------CLOSE PR---------------------------------------------------
