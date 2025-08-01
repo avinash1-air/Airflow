@@ -135,6 +135,7 @@ jobs:
 
       - name: Merge testig into main
         run: |
+          git fetch origin
           git checkout main
           git merge origin/testig --no-ff -m "Auto-merged testig into main"
           git push origin main
