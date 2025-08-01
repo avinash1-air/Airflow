@@ -61,7 +61,7 @@
 #           echo "Performing release..."
 
 
-
+#---------------------------------------------------AUTO-MERGE---------------------------------------------------
 name: Run Tests and Auto-Merge to Main
 on:
   pull_request:
